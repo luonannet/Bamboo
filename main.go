@@ -1,16 +1,28 @@
 package main
 
 import (
+	"Bamboo/utils"
 	"fmt"
+	"log"
+	"strconv"
 	"time"
 
 	tp "github.com/henrylee2cn/teleport"
 )
 
+//Machine 本机
 type Machine struct {
 	tp.Peer
-	neighbor     []*tp.Session
-	neighborAddr []string
+	neighbor []*tp.Session
+
+	caller *callerStruct
+	sender *senderStruct
+}
+type callerStruct struct {
+	tp.CallCtx
+}
+type senderStruct struct {
+	tp.PushCtx
 }
 
 var machine Machine
@@ -18,40 +30,37 @@ var machine Machine
 func main() {
 	machine.Peer = tp.NewPeer(tp.PeerConfig{
 		CountTime:  true,
-		ListenPort: 9527,
+		ListenPort: uint16(utils.Config.Port),
 	})
 
-	findNeighbor()
-	machine.Peer.RouteCall(new(caller))
-	machine.Peer.RoutePush(new(sender))
+	machine.pingNeighbor()
+	machine.caller = new(callerStruct)
+	machine.sender = new(senderStruct)
+	machine.Peer.RouteCall(machine.caller)
+	machine.Peer.RoutePush(machine.sender)
 	machine.Peer.ListenAndServe()
 }
 
-type caller struct {
-	tp.CallCtx
-}
-
-type sender struct {
-	tp.PushCtx
-}
-
-//findNeighbor 发现邻居
-func findNeighbor() {
-	time.Sleep(time.Second * 1)
-	machine.neighborAddr = []string{":9528", "9529"}
-	for _, add := range machine.neighborAddr {
-		sess, err := machine.Peer.Dial(add)
+//pingNeighbor 发现邻居
+func (m *Machine) pingNeighbor() {
+	for _, add := range utils.Config.NeighborAddrs {
+		sess, err := machine.Peer.Dial(add + ":" + strconv.Itoa(utils.Config.Port))
 		if err != nil {
-			tp.Fatalf("%v", err)
+			log.Printf("pingNeighbor  Error : %v", err)
 		}
 		machine.neighbor = append(machine.neighbor, &sess)
 	}
 }
 
-//AddNeighbor 添加邻居
-func (m *caller) AddNeighbor(arg *[]int) (int, *tp.Rerror) {
-	if m.Query().Get("addNeighbor") == "yes" {
-		m.Session().Push(
+//createLibrary 创建自己的仓库
+func (m *Machine) createLibrary() {
+
+}
+
+//AddNeighbor 添加邻居,
+func (m *Machine) AddNeighbor(arg *[]int) (int, *tp.Rerror) {
+	if m.caller.Query().Get("addNeighbor") == "yes" {
+		m.caller.Session().Push(
 			"/sender/status",
 			fmt.Sprintf("%d numbers are being added...", len(*arg)),
 		)
@@ -65,9 +74,9 @@ func (m *caller) AddNeighbor(arg *[]int) (int, *tp.Rerror) {
 }
 
 //BoardCast BoardCast
-func (m *caller) BoardCast(arg *[]int) (int, *tp.Rerror) {
-	if m.Query().Get("push_status") == "yes" {
-		m.Session().Push(
+func (m *Machine) BoardCast(arg *[]int) (int, *tp.Rerror) {
+	if m.caller.Query().Get("push_status") == "yes" {
+		m.caller.Session().Push(
 			"/sender/status",
 			fmt.Sprintf("%d numbers are being added...", len(*arg)),
 		)
@@ -79,7 +88,7 @@ func (m *caller) BoardCast(arg *[]int) (int, *tp.Rerror) {
 	}
 	return r, nil
 }
-func (s *sender) Status(arg *string) *tp.Rerror {
+func (s *Machine) Status(arg *string) *tp.Rerror {
 	tp.Printf("server status: %s", *arg)
 	return nil
 }
