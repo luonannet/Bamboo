@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	// "Bamboo"
 	"Bamboo/hand"
 	"Bamboo/utils"
+	"net"
 	"os"
 	"path"
 	"strconv"
@@ -13,9 +15,8 @@ import (
 
 //Machine 本机
 type Machine struct {
-	tp.Peer
 	neighbor []*tp.Session
-	index    uint64
+	ip       string
 	client   *hand.Client
 	server   *hand.Server
 	dataFile *os.File
@@ -24,19 +25,13 @@ type Machine struct {
 var machine Machine
 
 func main() {
-	machine.Peer = tp.NewPeer(tp.PeerConfig{
-		CountTime:  true,
-		ListenPort: uint16(utils.Config.Port),
-	})
-	// machine.index = 101
+	machine.ip = getMachineIP()
 	machine.createLibrary()
+	machine.client = hand.NewClient()
+	machine.server = hand.NewServer()
 	machine.pingNeighbor()
-	machine.client = new(hand.Client)
-	machine.server = new(hand.Server)
-	machine.Peer.RouteCall(machine.server)
-	machine.Peer.RoutePush(machine.client)
-	go QueryRoute(machine.neighbor)
-	machine.Peer.ListenAndServe()
+	go machine.joinNet()
+	machine.server.Peer.ListenAndServe()
 }
 
 //createLibrary 创建自己的分段仓库
@@ -51,7 +46,7 @@ func (m *Machine) createLibrary() {
 		m.dataFile, fileerr = os.Create(dataName)
 	}
 	if fileerr != nil {
-		utils.Log.Error("createLibrary  Error : %v", fileerr)
+		utils.Error(fmt.Sprintf("createLibrary  Error : %v ", fileerr))
 		return
 	}
 }
@@ -59,25 +54,36 @@ func (m *Machine) createLibrary() {
 //pingNeighbor 发现邻居
 func (m *Machine) pingNeighbor() {
 	for _, add := range utils.Config.NeighborAddrs {
-		sess, err := machine.Peer.Dial(add + ":" + strconv.Itoa(utils.Config.Port))
+		sess, err := machine.client.Peer.Dial(add + ":" + strconv.Itoa(utils.Config.Port))
 		if err != nil {
-			utils.Log.Debug("pingNeighbor  Error : %v", err)
+			utils.Debug(fmt.Sprintf("pingNeighbor  Error : %v ", err))
 			continue
 		}
 		machine.neighbor = append(machine.neighbor, &sess)
 	}
 }
 
-//AddNeighbor 添加邻居
-func (m *Machine) AddNeighbor(arg *[]int) {
-
+func getMachineIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return "127.0.0.1"
 }
 
 var result interface{}
 
-//QueryRoute QueryRoute
-func QueryRoute(sessList []*tp.Session) {
-	for _, sess := range sessList {
-		(*sess).Call("/server/queryroute", "queryItemData data", &result)
+//joinNet 向预设的节点发出请求通知，报告自己的ip，获取自己节点的相关路由
+func (m *Machine) joinNet() {
+	myip := []string{m.ip, "30000", "40000"}
+	for _, sess := range m.neighbor {
+		(*sess).Call("/server/queryroute", &myip, &result)
 	}
 }
