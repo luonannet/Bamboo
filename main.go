@@ -14,10 +14,10 @@ func main() {
 }
 
 //initData 携带本机数据加入网络
-func initData(ip string) *data.NodeData {
-	thisData := new(data.NodeData)
-	thisData.IP = ip
+func initData(ip string) *data.RouteData {
+	thisData := new(data.RouteData)
 	thisData.StartIndex = 30000
 	thisData.EndIndex = 40000
+	thisData.IP = ip
 	return thisData
 }

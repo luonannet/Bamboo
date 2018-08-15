@@ -46,6 +46,7 @@ func getMachineIP() string {
 func (m *Machine) PingNeighbor() {
 	for _, add := range utils.Config.NeighborAddrs {
 		if strings.EqualFold(add, m.IP) {
+			//如果是本機
 			continue
 		}
 		sess, err := m.Client.Peer.Dial(add + ":" + strconv.Itoa(utils.Config.Port))
@@ -60,8 +61,9 @@ func (m *Machine) PingNeighbor() {
 var result interface{}
 
 //JoinNet 向预设的节点发出请求通知，报告自己的ip，获取自己节点的相关路由
-func (m *Machine) JoinNet(data *data.NodeData) {
+func (m *Machine) JoinNet(data *data.RouteData) {
 	for _, sess := range m.neighbor {
+
 		(*sess).Call("/server/nodejoin", data, &result)
 	}
 }

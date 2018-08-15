@@ -1,7 +1,6 @@
 package data
 
 import (
-	"Bamboo/utils"
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
@@ -10,35 +9,39 @@ import (
 	"path"
 )
 
-var dataFile *os.File
+var itemDataFile *os.File
 
 func init() {
+	itemDataFile = createData("item.data")
+	gob.Register(new(ItemData))
+
+}
+func createData(fileName string) (file *os.File) {
 	dir := "store"
-	dataName := path.Join(dir, "bamboo.data")
+	dataName := path.Join(dir, fileName)
 	_, fileerr := os.Stat(dataName)
 	os.MkdirAll(dir, os.ModeDir|os.ModePerm)
 	if os.IsExist(fileerr) {
-		dataFile, fileerr = os.OpenFile(dataName, os.O_CREATE|os.O_APPEND, os.ModeDevice|os.ModePerm)
+		file, fileerr = os.OpenFile(dataName, os.O_CREATE|os.O_APPEND, os.ModeDevice|os.ModePerm)
 	} else {
-		dataFile, fileerr = os.Create(dataName)
+		file, fileerr = os.Create(dataName)
 	}
 	if fileerr != nil {
-		utils.Error(fmt.Sprintf("createLibrary  Error : %v ", fileerr))
+		fmt.Println(fmt.Sprintf("createLibrary  Error : %v ", fileerr))
 		return
 	}
-	gob.Register(new(NodeData))
-
+	return
 }
 
-//NodeData 节点数据
-type NodeData struct {
+//ItemData 节点数据
+type ItemData struct {
 	IP         string
 	StartIndex uint64
 	EndIndex   uint64
 }
 
 //BuildRouteBytes 分解出route的bytes
-func (d *NodeData) BuildRouteBytes() []byte {
+func (d *ItemData) BuildRouteBytes() []byte {
 	nodeDataBf := bytes.NewBuffer(nil)
 	nodeEncode := gob.NewEncoder(nodeDataBf)
 	nodeEncode.Encode(d)
@@ -46,7 +49,7 @@ func (d *NodeData) BuildRouteBytes() []byte {
 }
 
 //UnBuildRouteBytes UnBuildRouteBytes
-func (d *NodeData) UnBuildRouteBytes(oribytes *[]byte) {
+func (d *ItemData) UnBuildRouteBytes(oribytes *[]byte) {
 	nodeDataBf := bytes.NewBuffer(*oribytes)
 	nodeDecode := gob.NewDecoder(nodeDataBf)
 	nodeDecode.Decode(d)
@@ -64,11 +67,11 @@ func (d *NodeData) UnBuildRouteBytes(oribytes *[]byte) {
 	endbf := bytes.NewBuffer(nil)
 	binary.Write(endbf, binary.BigEndian, d.EndIndex)
 	resultBytes = append(resultBytes, endbf.Bytes()...)
-	dataFile.Write(resultBytes)
+	routeDataFile.Write(resultBytes)
 }
 
 //BuildItemDataBytes 分解出itemData的bytes
-func (d *NodeData) BuildItemDataBytes() {
+func (d *ItemData) BuildItemDataBytes() {
 
 }
 

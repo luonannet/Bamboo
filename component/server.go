@@ -25,23 +25,22 @@ func NewServer() *Server {
 }
 
 //Nodejoin 新节点汇报自己的存储信息
-func (s *Server) Nodejoin(nodeData *data.NodeData) (int, *tp.Rerror) {
+func (s *Server) Nodejoin(nodeData *data.RouteData) (int, *tp.Rerror) {
 	routeBytes := nodeData.BuildRouteBytes()
-	var readNodeData data.NodeData
+	var readNodeData data.RouteData
 	readNodeData.UnBuildRouteBytes(&routeBytes)
+	updateRoute(&readNodeData)
 	s.Session().Push("/client/receive", *nodeData)
 	return 2, nil
 }
 
-//UpdateRoute 更新路由
-func (s *Server) UpdateRoute(nodeData *data.NodeData) (int, *tp.Rerror) {
+//updateRoute 更新路由
+func updateRoute(nodeData *data.RouteData) {
 
-	s.Session().Push("/client/receive", *nodeData)
-	return 2, nil
 }
 
 //UpdateItem 更新数据
-func (s *Server) UpdateItem(nodeData *data.NodeData) (int, *tp.Rerror) {
+func (s *Server) UpdateItem(nodeData *data.RouteData) (int, *tp.Rerror) {
 
 	s.Session().Push("/client/receive", *nodeData)
 	return 2, nil
