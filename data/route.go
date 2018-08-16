@@ -43,28 +43,20 @@ func (d *RouteData) UnBuildRouteBytes(oribytes *[]byte) {
 	d.writeToFile()
 }
 func (d *RouteData) writeToFile() {
-	var resultBytes []byte
-	ipbf := bytes.NewBufferString(d.IP)
-	blankLen := 46 - len(ipbf.Bytes()) //ipv6的长度46
-	blankBytes := make([]byte, blankLen, blankLen)
-	ipbf.Write(blankBytes) //空白补齐
-	resultBytes = ipbf.Bytes()
-
-	startbf := bytes.NewBuffer(nil)
-	binary.Write(startbf, binary.BigEndian, d.StartIndex)
-	resultBytes = append(resultBytes, startbf.Bytes()...)
-
-	endbf := bytes.NewBuffer(nil)
-	binary.Write(endbf, binary.BigEndian, d.EndIndex)
-	resultBytes = append(resultBytes, endbf.Bytes()...)
-	routeDataFile.Write(resultBytes)
+	routeDataFile.Write(d.toBytes())
 	var testreadRoutedata RouteData
 	testreadRoutedata.readFromFile(0)
 }
 
-//BuildItemDataBytes 分解出itemData的bytes
-func (d *RouteData) BuildItemDataBytes() {
-
+func (d *RouteData) toBytes() []byte {
+	resultBytes := make([]byte, 62, 62)
+	ipbf := bytes.NewBufferString(d.IP)
+	resultBF := bytes.NewBuffer(resultBytes)
+	resultBF.Truncate(0)
+	resultBF.Write(ipbf.Bytes())
+	binary.Write(resultBF, binary.BigEndian, d.StartIndex)
+	binary.Write(resultBF, binary.BigEndian, d.EndIndex)
+	return resultBF.Bytes()
 }
 
 //BuildItemDataBytes 分解出itemData的bytes
