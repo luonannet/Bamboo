@@ -29,15 +29,25 @@ func (s *Server) Nodejoin(nodeData *data.RouteData) (int, *tp.Rerror) {
 	routeBytes := nodeData.BuildRouteBytes()
 	var readNodeData data.RouteData
 	readNodeData.UnBuildRouteBytes(&routeBytes)
-	updateRoute(&readNodeData)
+	// updateRoute(&readNodeData)
 	s.Session().Push("/client/receive", *nodeData)
 	return 2, nil
 }
 
-//updateRoute 更新路由
-func updateRoute(nodeData *data.RouteData) {
-
-}
+// //updateRoute 更新路由
+// func updateRoute(nodeData *data.RouteData) {
+// 	utils.Config.NeighborAddrs = append(utils.Config.NeighborAddrs, nodeData.IP)
+// 	data, err := yaml.Marshal(utils.Config)
+// 	if err != nil {
+// 		fmt.Println("Marshal err:", err.Error())
+// 		return
+// 	}
+// 	err = ioutil.WriteFile("conf/app.yml", data, 0666)
+// 	if err != nil {
+// 		fmt.Println("WriteFile err:", err.Error())
+// 		return
+// 	}
+// }
 
 //UpdateItem 更新数据
 func (s *Server) UpdateItem(nodeData *data.RouteData) (int, *tp.Rerror) {

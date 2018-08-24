@@ -1,4 +1,6 @@
-appname: 'bamboo' 
+appname: 'bamboo'
 port: 9527
+startindex: 30000
+endindex: 40000
 neighboraddrs:
 - '192.168.0.182'
