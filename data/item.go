@@ -10,7 +10,8 @@ import (
 )
 
 var itemDataFile *os.File
-
+var startIndex int64 //存储在本节点的 开始index
+var endIndex int64   //存储在本节点的 结束index
 func init() {
 	itemDataFile = createData("item.data")
 	gob.Register(new(ItemData))
@@ -62,8 +63,3 @@ func (d *ItemData) toBytes() []byte {
 	resultBF.Write(d.Data)
 	return resultBF.Bytes()
 }
-
-// //SaveRouteBytes 分解出route的bytes
-// func SaveRouteBytes(databytes []byte) {
-// 	dataFile.Write(databytes)
-// }

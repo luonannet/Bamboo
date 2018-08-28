@@ -40,8 +40,8 @@ func (d *RouteData) BuildRouteBytes() []byte {
 	return nodeDataBf.Bytes()
 }
 
-//UnBuildRouteBytes UnBuildRouteBytes
-func (d *RouteData) UnBuildRouteBytes(oribytes *[]byte) {
+//SaveRoute SaveRoute
+func (d *RouteData) SaveRoute(oribytes *[]byte) {
 	nodeDataBf := bytes.NewBuffer(*oribytes)
 	nodeDecode := gob.NewDecoder(nodeDataBf)
 	nodeDecode.Decode(d)
@@ -105,6 +105,5 @@ func findRoute(index uint64) (nextIP string) {
 			return route.IP
 		}
 	}
-
 	return ""
 }

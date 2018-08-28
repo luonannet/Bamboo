@@ -4,11 +4,13 @@ import (
 	"Bamboo/data"
 	"Bamboo/utils"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"strconv"
 	"strings"
 
 	tp "github.com/henrylee2cn/teleport"
+	yaml "gopkg.in/yaml.v2"
 )
 
 //Machine 本机
@@ -63,8 +65,22 @@ var result interface{}
 
 //JoinNet 向预设的节点发出请求通知，报告自己的ip，获取自己节点的相关路由
 func (m *Machine) JoinNet(data *data.RouteData) {
-
 	for _, sess := range m.neighbor {
 		(*sess).Call("/server/nodejoin", data, &result)
+	}
+}
+
+//updateNeighbor 更新邻居
+func updateNeighbor(nodeData *data.RouteData) {
+	utils.Config.NeighborAddrs = append(utils.Config.NeighborAddrs, nodeData.IP)
+	data, err := yaml.Marshal(utils.Config)
+	if err != nil {
+		fmt.Println("Marshal err:", err.Error())
+		return
+	}
+	err = ioutil.WriteFile("conf/app.yml", data, 0666)
+	if err != nil {
+		fmt.Println("WriteFile err:", err.Error())
+		return
 	}
 }

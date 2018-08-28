@@ -9,7 +9,6 @@ import (
 
 //ConfigStruct 配置信息结构体
 type ConfigStruct struct {
-	AppName       string
 	Port          int
 	StartIndex    uint64
 	EndIndex      uint64
