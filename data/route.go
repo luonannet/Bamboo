@@ -1,10 +1,10 @@
 package data
 
 import (
+	"Bamboo/utils"
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
 	"os"
 )
 
@@ -78,7 +78,7 @@ func (rl *routeListStruct) readFromFile(index int64) {
 		data := make([]byte, 62)
 		_, err := routeDataFile.ReadAt(data, place)
 		if err != nil || len(data) == 0 {
-			fmt.Println("readFromFile error:", err)
+			utils.Debug("readFromFile error:", err)
 			return
 		}
 		var d RouteData
@@ -86,13 +86,13 @@ func (rl *routeListStruct) readFromFile(index int64) {
 		startReader := bytes.NewReader(data[46:54])
 		err = binary.Read(startReader, binary.BigEndian, &d.StartIndex)
 		if err != nil {
-			fmt.Println(" StartIndex ", err.Error())
+			utils.Debug(" StartIndex ", err.Error())
 			return
 		}
 		endReader := bytes.NewReader(data[54:62])
 		err = binary.Read(endReader, binary.BigEndian, &d.EndIndex)
 		if err != nil {
-			fmt.Println(" EndIndex ", err.Error())
+			utils.Debug(" EndIndex ", err.Error())
 			return
 		}
 		routeList = append(routeList, &d)

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"Bamboo/utils"
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
@@ -28,7 +29,7 @@ func createData(fileName string) (file *os.File) {
 		file, fileerr = os.Create(dataName)
 	}
 	if fileerr != nil {
-		fmt.Println(fmt.Sprintf("createLibrary  Error : %v ", fileerr))
+		utils.Debug(fmt.Sprintf("createLibrary  Error : %v ", fileerr))
 		return
 	}
 	return

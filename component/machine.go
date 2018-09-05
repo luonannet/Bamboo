@@ -49,12 +49,12 @@ func (m *Machine) PingNeighbor() {
 
 	for _, add := range utils.Config.NeighborAddrs {
 		if strings.EqualFold(add, m.IP) {
-			//如果是本機
+			//如果是本机
 			continue
 		}
 		sess, err := m.Client.Peer.Dial(add + ":" + strconv.Itoa(utils.Config.Port))
 		if err != nil {
-			fmt.Println(fmt.Sprintf("pingNeighbor  Error : %v ", err))
+			utils.Debug(fmt.Sprintf("pingNeighbor  Error : %v ", err))
 			continue
 		}
 		m.neighbor = append(m.neighbor, &sess)
@@ -75,12 +75,12 @@ func updateNeighbor(nodeData *data.RouteData) {
 	utils.Config.NeighborAddrs = append(utils.Config.NeighborAddrs, nodeData.IP)
 	data, err := yaml.Marshal(utils.Config)
 	if err != nil {
-		fmt.Println("Marshal err:", err.Error())
+		utils.Debug("Marshal err:", err.Error())
 		return
 	}
 	err = ioutil.WriteFile("conf/app.yml", data, 0666)
 	if err != nil {
-		fmt.Println("WriteFile err:", err.Error())
+		utils.Debug("WriteFile err:", err.Error())
 		return
 	}
 }

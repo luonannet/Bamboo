@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
@@ -21,12 +20,12 @@ var Config ConfigStruct
 func init() {
 	data, err := ioutil.ReadFile("conf/app.yml")
 	if err != nil {
-		fmt.Println("init ReadFile error:", err.Error())
+		Debug("init ReadFile error:", err.Error())
 		return
 	}
 	err = yaml.Unmarshal(data, &Config)
 	if err != nil {
-		fmt.Println("init Unmarshal error: ", err.Error())
+		Debug("init Unmarshal error: ", err.Error())
 		return
 	}
 }

@@ -3,11 +3,11 @@ package utils
 import "github.com/astaxie/beego/logs"
 
 //Log 日志
-var log *logs.BeeLogger
+var logger *logs.BeeLogger
 
 func init() {
-	log = logs.NewLogger(logs.LevelDebug)
-	log.SetLogger("multifile", `{"filename":"log/test.log","separate":["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]}`)
+	logger = logs.NewLogger(logs.LevelDebug)
+	logger.SetLogger("multifile", `{"filename":"log/test.log","separate":["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]}`)
 	// log.Debug("debug")
 	// log.Informational("info")
 	// log.Notice("notice")
@@ -18,9 +18,13 @@ func init() {
 	// log.Emergency("emergency")
 
 }
-func Debug(info string) {
-	log.Debug("")
+
+//Debug Debug
+func Debug(info ...interface{}) {
+	logger.Debug("debug: %v", info)
 }
-func Error(info string) {
-	log.Error("")
+
+//Error Error
+func Error(info ...interface{}) {
+	logger.Error("error: %v", info)
 }
